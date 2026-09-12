@@ -1,0 +1,3 @@
+ALTER TABLE settings ADD COLUMN bio TEXT NOT NULL DEFAULT '';
+ALTER TABLE settings ADD COLUMN links TEXT NOT NULL DEFAULT '[]';
+UPDATE questions SET is_public = 1 WHERE answer IS NOT NULL;

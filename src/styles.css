@@ -1,0 +1,27 @@
+@import "tailwindcss" source(none);
+@source "./**/*.ts";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces", "Amiri", "Iowan Old Style", Georgia, serif;
+  --color-paper: #f4ece0;
+  --color-card: #fffaf3;
+  --color-ink: #1c1612;
+  --color-mute: #6f675e;
+  --color-line: #e7dccf;
+  --color-ember: #e25b2a;
+  --color-ember-dark: #c4471c;
+  --shadow-lift: 0 24px 50px -28px rgb(28 22 18 / 0.45);
+}
+
+@layer base {
+  html {
+    background: var(--color-paper);
+  }
+  details > summary {
+    list-style: none;
+  }
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+}

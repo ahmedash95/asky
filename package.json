@@ -1,0 +1,23 @@
+{
+  "name": "asky",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "css": "npx @tailwindcss/cli -i ./src/styles.css -o ./public/app.css --minify",
+    "predev": "npm run css",
+    "predeploy": "npm run css",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:local": "wrangler d1 migrations apply asky --local",
+    "test": "node --experimental-strip-types --test src/*.test.ts"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260911.1",
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3",
+    "wrangler": "^4.131.1"
+  },
+  "dependencies": {
+    "@cf-wasm/resvg": "^0.4.0"
+  }
+}

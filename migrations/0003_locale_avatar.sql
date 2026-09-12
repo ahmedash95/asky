@@ -1,0 +1,3 @@
+ALTER TABLE settings ADD COLUMN locale TEXT NOT NULL DEFAULT 'en';
+ALTER TABLE settings ADD COLUMN avatar BLOB;
+ALTER TABLE settings ADD COLUMN avatar_type TEXT;
