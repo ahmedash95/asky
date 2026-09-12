@@ -20,8 +20,12 @@ export function layout(opts: {
   const shell =
     chrome === "setup" || chrome === "login"
       ? "relative mx-auto max-w-lg px-4 pb-20 pt-10 sm:pt-14"
-      : "relative mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6 sm:pt-8"
+      : "relative mx-auto max-w-6xl px-3 pb-14 pt-4 sm:px-6 sm:pt-8 sm:pb-16"
   const copied = t(locale, "copied")
+  const themeBoot =
+    chrome === "public"
+      ? `<script>(function(){try{var p=localStorage.getItem("asky-theme")||"system";if(p==="dark"||(p!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}})();</script>`
+      : ""
   return `<!DOCTYPE html>
 <html lang="${locale}" dir="${dir}">
 <head>
@@ -32,11 +36,12 @@ export function layout(opts: {
 <link href="https://fonts.bunny.net/css?family=fraunces:500,600,700|plus-jakarta-sans:400,500,600,700|amiri:400,700|cairo:400,500,600,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/app.css">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+${themeBoot}
 ${opts.extraHead ?? ""}
 ${beacon}
 </head>
 <body class="min-h-dvh bg-paper font-sans text-ink antialiased">
-<div class="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(226,91,42,0.14),_transparent_52%)]"></div>
+<div class="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(226,91,42,0.14),_transparent_52%)] dark:opacity-40"></div>
 <div class="${shell}">
 ${chrome === "setup" || chrome === "login" ? setupHeader(opts.env, locale, opts.hasAvatar === true, chrome === "setup") : ""}
 <main>${opts.body}</main>
@@ -59,6 +64,26 @@ document.addEventListener("change", (e) => {
   const url = URL.createObjectURL(input.files[0]);
   box.innerHTML = '<img src="' + url + '" alt="" class="size-full object-cover">';
 });
+(function () {
+  const key = "asky-theme";
+  const buttons = document.querySelectorAll("[data-theme-set]");
+  if (!buttons.length) return;
+  const pref = () => { try { return localStorage.getItem(key) || "system"; } catch (e) { return "system"; } };
+  const dark = (p) => p === "dark" || (p !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+  const apply = (p) => {
+    document.documentElement.classList.toggle("dark", dark(p));
+    buttons.forEach((b) => b.setAttribute("aria-pressed", b.getAttribute("data-theme-set") === p ? "true" : "false"));
+  };
+  apply(pref());
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (pref() === "system") apply("system"); });
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-theme-set]");
+    if (!b) return;
+    const p = b.getAttribute("data-theme-set");
+    try { localStorage.setItem(key, p); } catch (e) {}
+    apply(p);
+  });
+})();
 </script>
 </body>
 </html>`
@@ -84,30 +109,52 @@ ${lead}
 </header>`
 }
 
+function themeSwitch(locale: Locale, where: "side" | "foot" = "side"): string {
+  const pill =
+    "flex-1 rounded-full px-2 py-1.5 text-xs font-medium text-mute transition aria-pressed:bg-ink aria-pressed:text-paper"
+  const btn = (id: "light" | "dark" | "system", label: string) =>
+    `<button type="button" class="${pill}" data-theme-set="${id}" aria-pressed="false">${escapeHtml(label)}</button>`
+  const wrap = where === "side" ? "mt-8 hidden lg:block" : "mt-10 lg:hidden"
+  return `<div class="${wrap}">
+<p class="mb-2 text-xs font-medium text-mute">${escapeHtml(t(locale, "theme"))}</p>
+<div class="flex gap-0.5 rounded-full bg-card p-1 ring-1 ring-line" role="group" aria-label="${escapeHtml(t(locale, "theme"))}">
+${btn("light", t(locale, "themeLight"))}
+${btn("dark", t(locale, "themeDark"))}
+${btn("system", t(locale, "themeSystem"))}
+</div>
+</div>`
+}
+
 export function profileSidebar(env: Env, settings: Settings): string {
   const name = escapeHtml(env.SITE_NAME)
   const locale = settings.locale
   const photo = settings.has_avatar
     ? `<img src="/avatar" alt="" class="size-full object-cover">`
-    : `<span class="font-serif text-4xl text-paper">?</span>`
+    : `<span class="font-serif text-2xl text-paper lg:text-4xl">?</span>`
   const bio = settings.bio.trim() || t(locale, "tagline")
   const links = settings.links
     .map(
       (link) =>
-        `<a class="group flex items-center justify-between gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-ink transition hover:bg-card" href="${escapeHtml(link.url)}" rel="noopener noreferrer" target="_blank"><span class="min-w-0 truncate">${escapeHtml(link.title)}</span><span class="shrink-0 text-mute transition group-hover:text-ember" aria-hidden="true">↗</span></a>`,
+        `<a class="inline-flex items-center gap-1 rounded-full border border-line bg-card px-2.5 py-1 text-xs font-medium text-ink lg:flex lg:justify-between lg:rounded-2xl lg:border-0 lg:bg-transparent lg:px-3 lg:py-2 lg:text-sm lg:hover:bg-card" href="${escapeHtml(link.url)}" rel="noopener noreferrer" target="_blank"><span class="min-w-0 truncate">${escapeHtml(link.title)}</span><span class="hidden shrink-0 text-mute lg:inline" aria-hidden="true">↗</span></a>`,
     )
     .join("")
   return `<aside class="lg:sticky lg:top-8">
-<a href="/" class="grid size-28 place-items-center overflow-hidden rounded-full bg-ink shadow-lift ring-4 ring-white/50" aria-label="${name}">${photo}</a>
-<h1 class="mt-5 font-serif text-3xl font-semibold tracking-tight">${name}</h1>
-<p class="mt-2 text-[0.95rem] leading-relaxed text-mute" dir="auto">${escapeHtml(bio)}</p>
-${links ? `<nav class="mt-5 grid gap-0.5">${links}</nav>` : ""}
+<div class="flex items-center gap-3 lg:block">
+<a href="/" class="grid size-14 shrink-0 place-items-center overflow-hidden rounded-full bg-ink shadow-lift ring-2 ring-white/40 lg:size-28 lg:ring-4 lg:ring-white/50" aria-label="${name}">${photo}</a>
+<div class="min-w-0 lg:mt-5">
+<h1 class="font-serif text-xl font-semibold tracking-tight lg:text-3xl">${name}</h1>
+<p class="mt-0.5 line-clamp-2 text-sm leading-relaxed text-mute lg:mt-2 lg:line-clamp-none lg:text-[0.95rem]" dir="auto">${escapeHtml(bio)}</p>
+</div>
+</div>
+${links ? `<nav class="mt-3 flex flex-wrap gap-1.5 lg:mt-5 lg:grid lg:gap-0.5">${links}</nav>` : ""}
+${themeSwitch(locale, "side")}
 </aside>`
 }
 
 export function publicFrame(env: Env, settings: Settings, main: string): string {
-  return `<div class="grid items-start gap-10 lg:grid-cols-[17rem_minmax(0,1fr)]">
+  return `<div class="grid items-start gap-6 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-10">
 ${profileSidebar(env, settings)}
 <div class="min-w-0">${main}</div>
-</div>`
+</div>
+${themeSwitch(settings.locale, "foot")}`
 }

@@ -8,7 +8,7 @@ import {
 } from "./security"
 import { layout, publicFrame } from "./html"
 import { t, type Locale } from "./i18n"
-import { btnBlock, card, chip, flashOk, help, input, label } from "./ui"
+import { btnBlock, btnGhost, card, flashOk, help, input, label } from "./ui"
 
 export function handlePublic(request: Request, env: Env, settings: Settings): Promise<Response> {
   const url = new URL(request.url)
@@ -50,7 +50,7 @@ function askForm(env: Env, locale: Locale): string {
     : ""
   return `<form class="${card}" method="post" action="/ask">
 <label class="sr-only" for="body">${escapeHtml(t(locale, "question"))}</label>
-<textarea id="body" dir="auto" class="min-h-32 w-full resize-y bg-transparent font-serif text-2xl leading-snug text-ink outline-none placeholder:text-mute/60" name="body" required maxlength="1000" placeholder="${escapeHtml(t(locale, "askPlaceholder"))}"></textarea>
+<textarea id="body" dir="auto" class="min-h-24 w-full resize-y bg-transparent font-serif text-xl leading-snug text-ink outline-none placeholder:text-mute/60 sm:min-h-32 sm:text-2xl" name="body" required maxlength="1000" placeholder="${escapeHtml(t(locale, "askPlaceholder"))}"></textarea>
 <details class="mt-4">
 <summary class="cursor-pointer text-sm font-medium text-mute hover:text-ink">${escapeHtml(t(locale, "signName"))} <span class="font-normal">${escapeHtml(t(locale, "optional"))}</span></summary>
 <div class="mt-3 grid gap-3 sm:grid-cols-2">
@@ -64,37 +64,57 @@ ${turnstile}
 </form>`
 }
 
-function byline(q: Question, locale: Locale): string {
-  if (q.is_anonymous === 0 && q.asker_name) {
-    return `<p class="mt-3 text-sm text-mute" dir="auto">${escapeHtml(t(locale, "askedBy"))} ${escapeHtml(q.asker_name)}</p>`
-  }
-  return ""
+function when(ts: number, locale: Locale): string {
+  return new Date(ts * 1000).toLocaleDateString(locale === "ar" ? "ar" : "en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })
 }
 
-function shares(origin: string, q: Question, locale: Locale): string {
+function meta(q: Question, locale: Locale): string {
+  const bits: string[] = []
+  if (q.is_anonymous === 0 && q.asker_name) {
+    bits.push(`${escapeHtml(t(locale, "askedBy"))} ${escapeHtml(q.asker_name)}`)
+  }
+  if (q.answered_at) {
+    const iso = new Date(q.answered_at * 1000).toISOString()
+    bits.push(`${escapeHtml(t(locale, "answeredOn"))} <time datetime="${iso}">${escapeHtml(when(q.answered_at, locale))}</time>`)
+  }
+  if (!bits.length) return ""
+  return `<p class="mt-6 text-sm text-mute" dir="auto">${bits.join(" · ")}</p>`
+}
+
+function action(href: string, label: string, attrs = ""): string {
+  return `<a class="flex min-h-11 flex-1 items-center justify-center px-2 text-sm font-medium text-mute transition hover:bg-card hover:text-ink" href="${escapeHtml(href)}"${attrs}>${escapeHtml(label)}</a>`
+}
+
+function shares(origin: string, q: Question, locale: Locale, onPage: boolean): string {
   const path = `/q/${q.public_id}`
   const permalink = `${origin}${path}`
   const tweet = `https://x.com/intent/tweet?url=${encodeURIComponent(permalink)}&text=${encodeURIComponent(q.body.slice(0, 120))}`
-  return `<div class="mt-5 flex flex-wrap gap-2">
-<a class="${chip}" href="${escapeHtml(tweet)}">${escapeHtml(t(locale, "shareX"))}</a>
-<button type="button" class="${chip}" data-copy="${escapeHtml(permalink)}">${escapeHtml(t(locale, "copyLink"))}</button>
-<a class="${chip}" href="${escapeHtml(path)}/og.png">${escapeHtml(t(locale, "downloadCard"))}</a>
-</div>`
+  const open = onPage ? "" : action(path, t(locale, "viewQuestion"))
+  return `<footer class="flex divide-x divide-line border-t border-line bg-paper/70 dark:bg-paper/40">
+${open}
+${action(tweet, t(locale, "shareX"))}
+<button type="button" class="flex min-h-11 flex-1 items-center justify-center px-2 text-sm font-medium text-mute transition hover:bg-card hover:text-ink" data-copy="${escapeHtml(permalink)}">${escapeHtml(t(locale, "copyLink"))}</button>
+${action(`${path}/og.png`, t(locale, "downloadCard"))}
+</footer>`
 }
 
-function qa(origin: string, q: Question, locale: Locale): string {
+function qa(origin: string, q: Question, locale: Locale, onPage = false): string {
   if (q.answer == null) return ""
-  const kicker = locale === "ar" ? "text-xs font-semibold text-ember" : "text-xs font-semibold uppercase tracking-[0.18em] text-ember"
-  const kickerMute = locale === "ar" ? "text-xs font-semibold text-mute" : "text-xs font-semibold uppercase tracking-[0.18em] text-mute"
-  return `<article class="${card}">
-<p class="${kicker}">${escapeHtml(t(locale, "question"))}</p>
-<p class="mt-2 font-serif text-2xl font-medium leading-snug" dir="auto">${escapeHtml(q.body)}</p>
-<div class="mt-5 border-t border-line pt-4">
-<p class="${kickerMute}">${escapeHtml(t(locale, "answer"))}</p>
-<p class="mt-2 text-[1.05rem] leading-relaxed" dir="auto">${escapeHtml(q.answer)}</p>
+  const path = `/q/${q.public_id}`
+  const title = onPage
+    ? `<p class="font-serif text-xl font-medium leading-snug sm:text-2xl" dir="auto">${escapeHtml(q.body)}</p>`
+    : `<p class="font-serif text-xl font-medium leading-snug sm:text-2xl"><a class="transition hover:text-ember" href="${escapeHtml(path)}" dir="auto">${escapeHtml(q.body)}</a></p>`
+  return `<article class="overflow-hidden rounded-2xl bg-card shadow-lift ring-1 ring-line/80 sm:rounded-3xl">
+<div class="px-5 pt-5 pb-7 sm:px-7 sm:pt-6 sm:pb-8">
+${title}
+<p class="mt-5 text-[1.05rem] leading-relaxed text-ink/90" dir="auto">${escapeHtml(q.answer)}</p>
+${meta(q, locale)}
 </div>
-${byline(q, locale)}
-${shares(origin, q, locale)}
+${shares(origin, q, locale, onPage)}
 </article>`
 }
 
@@ -109,8 +129,8 @@ async function home(url: URL, env: Env, settings: Settings): Promise<Response> {
   const list =
     wall.length === 0
       ? `<p class="mt-8 text-sm text-mute">${escapeHtml(t(locale, "emptyWall"))}</p>`
-      : `<h2 class="mt-10 mb-4 font-serif text-xl font-semibold">${escapeHtml(t(locale, "answered"))}</h2>
-<div class="grid gap-5">${items}</div>`
+      : `<h2 class="mt-8 mb-3 font-serif text-lg font-semibold sm:mt-10 sm:mb-4 sm:text-xl">${escapeHtml(t(locale, "answered"))}</h2>
+<div class="grid gap-3 sm:gap-5">${items}</div>`
   return page(200, env, settings, `${thanks}${askForm(env, locale)}${list}`)
 }
 
@@ -164,6 +184,6 @@ async function permalink(url: URL, env: Env, settings: Settings, uuid: string): 
 <meta property="og:image" content="${escapeHtml(image)}">
 <meta name="twitter:card" content="summary_large_image">`
 
-  const back = `<p class="mb-5"><a class="text-sm font-medium text-mute hover:text-ink" href="/">${escapeHtml(t(settings.locale, "allAnswers"))}</a></p>`
-  return page(200, env, settings, `${back}${qa(url.origin, q, settings.locale)}`, extraHead)
+  const back = `<p class="mb-4"><a class="${btnGhost} w-full sm:w-auto" href="/">${escapeHtml(t(settings.locale, "backToQuestions"))}</a></p>`
+  return page(200, env, settings, `${back}${qa(url.origin, q, settings.locale, true)}`, extraHead)
 }

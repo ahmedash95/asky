@@ -162,28 +162,34 @@ function adminNav(
   const item = (id: View, label: string, count?: number) => {
     const on = view === id
     const cls = on
-      ? "flex w-full items-center justify-between gap-3 rounded-2xl bg-ink px-3 py-2.5 text-sm font-medium text-paper"
-      : "flex w-full items-center justify-between gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-mute transition hover:bg-card hover:text-ink"
+      ? "flex w-full items-center justify-center gap-1.5 rounded-2xl bg-ink px-2 py-2 text-sm font-medium text-paper lg:justify-between lg:gap-3 lg:px-3 lg:py-2.5"
+      : "flex w-full items-center justify-center gap-1.5 rounded-2xl px-2 py-2 text-sm font-medium text-mute transition hover:bg-card hover:text-ink lg:justify-between lg:gap-3 lg:px-3 lg:py-2.5"
     const badge =
       count == null
         ? ""
         : `<span class="rounded-full ${on ? "bg-white/15 text-paper" : "bg-paper text-mute"} px-2 py-0.5 text-xs tabular-nums">${count}</span>`
     return `<a class="${cls}" href="${href}?view=${id}"><span>${escapeHtml(label)}</span>${badge}</a>`
   }
-  return `<aside class="mb-8 lg:mb-0 lg:sticky lg:top-8">
-<div class="flex items-center gap-3">
-<a href="/" class="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-ink shadow-lift ring-1 ring-white/10">${photo}</a>
+  return `<aside class="mb-6 lg:mb-0 lg:sticky lg:top-8">
+<div class="flex items-center justify-between gap-3">
+<div class="flex min-w-0 items-center gap-3">
+<a href="/" class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-ink shadow-lift ring-1 ring-white/10">${photo}</a>
 <div class="min-w-0">
 <p class="truncate font-serif text-lg font-semibold leading-tight">${name}</p>
 <p class="mt-0.5 text-xs text-mute">${escapeHtml(t(locale, "privateInbox"))}</p>
 </div>
 </div>
-<nav class="mt-6 flex gap-1 overflow-x-auto pb-1 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:pb-0">
+<div class="flex shrink-0 items-center gap-3 text-sm font-medium lg:hidden">
+<a class="text-mute" href="/">${escapeHtml(t(locale, "viewSite"))}</a>
+<form method="post" action="${href}/logout"><button class="text-mute" type="submit">${escapeHtml(t(locale, "logOut"))}</button></form>
+</div>
+</div>
+<nav class="mt-4 grid grid-cols-3 gap-1 lg:mt-6 lg:flex lg:flex-col lg:gap-0.5">
 ${item("inbox", t(locale, "inbox"), s.unanswered)}
 ${item("answered", t(locale, "answered"), s.answered)}
 ${item("profile", t(locale, "profile"))}
 </nav>
-<div class="mt-6 flex items-center gap-2 border-t border-line pt-4 lg:flex-col lg:items-stretch">
+<div class="mt-6 hidden border-t border-line pt-4 lg:flex lg:flex-col lg:items-stretch lg:gap-2">
 <a class="${btnGhost}" href="/">${escapeHtml(t(locale, "viewSite"))}</a>
 <form method="post" action="${href}/logout"><button class="${btnGhost} w-full" type="submit">${escapeHtml(t(locale, "logOut"))}</button></form>
 </div>
@@ -197,7 +203,7 @@ async function questionsPane(env: Env, settings: Settings, base: string, view: "
   const empty = `<div class="${card} text-center"><p class="font-serif text-lg font-semibold">${escapeHtml(t(locale, view === "inbox" ? "emptyInbox" : "emptyAnswered"))}</p><p class="mt-2 text-sm text-mute">${escapeHtml(t(locale, view === "inbox" ? "emptyInboxHelp" : "emptyAnsweredHelp"))}</p></div>`
   const lead = view === "inbox" ? t(locale, "inboxLead") : t(locale, "answeredLead")
   return `<header class="mb-6">
-<h1 class="font-serif text-3xl font-semibold tracking-tight">${escapeHtml(t(locale, view))}</h1>
+<h1 class="font-serif text-2xl font-semibold tracking-tight lg:text-3xl">${escapeHtml(t(locale, view))}</h1>
 <p class="mt-1 text-sm text-mute">${escapeHtml(lead)}</p>
 </header>
 <div class="grid gap-4">${items || empty}</div>`
@@ -254,7 +260,7 @@ function profilePane(url: URL, settings: Settings, base: string): string {
     .join("")
   return `${err}${saved}
 <header class="mb-6">
-<h1 class="font-serif text-3xl font-semibold tracking-tight">${escapeHtml(t(locale, "profile"))}</h1>
+<h1 class="font-serif text-2xl font-semibold tracking-tight lg:text-3xl">${escapeHtml(t(locale, "profile"))}</h1>
 <p class="mt-1 text-sm text-mute">${escapeHtml(t(locale, "profileLead"))}</p>
 </header>
 <form method="post" action="${href}/profile" enctype="multipart/form-data">
@@ -286,10 +292,10 @@ function profilePane(url: URL, settings: Settings, base: string): string {
 <fieldset>
 <legend class="${label}">${escapeHtml(t(locale, "language"))}</legend>
 <div class="mt-3 flex gap-1 rounded-full bg-paper p-1 ring-1 ring-line w-fit">
-<label class="cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium ${locale === "en" ? "bg-ink text-paper" : "text-mute"}">
+<label class="cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium text-mute has-[:checked]:bg-ink has-[:checked]:text-paper">
 <input class="sr-only" type="radio" name="locale" value="en"${locale === "en" ? " checked" : ""}> ${escapeHtml(t(locale, "english"))}
 </label>
-<label class="cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium ${locale === "ar" ? "bg-ink text-paper" : "text-mute"}">
+<label class="cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium text-mute has-[:checked]:bg-ink has-[:checked]:text-paper">
 <input class="sr-only" type="radio" name="locale" value="ar"${locale === "ar" ? " checked" : ""}> ${escapeHtml(t(locale, "arabic"))}
 </label>
 </div>

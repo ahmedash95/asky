@@ -38,6 +38,7 @@ const en = {
   askedBy: "Asked by",
   shareX: "Share on X",
   copyLink: "Copy link",
+  viewQuestion: "View question",
   copied: "Copied",
   downloadCard: "Download card",
   answered: "Answered",
@@ -45,7 +46,7 @@ const en = {
   thanks: "Got it. You’ll see it here when it’s answered.",
   notFound: "This page does not exist.",
   notAnswered: "This question hasn’t been answered yet.",
-  allAnswers: "All answers",
+  backToQuestions: "Back to all questions",
   tooManyAsks: "Too many questions. Try again later.",
   forbidden: "Forbidden.",
   invalidQuestion: "Question must be 1–1000 characters.",
@@ -89,6 +90,10 @@ const en = {
   shortPassword: "Password must be at least 8 characters.",
   passwordMismatch: "Passwords do not match.",
   badPhoto: "Photo must be JPEG, PNG, WebP or GIF, up to 512 KB.",
+  theme: "Appearance",
+  themeLight: "Light",
+  themeDark: "Dark",
+  themeSystem: "System",
 }
 
 const ar: Record<keyof typeof en, string> = {
@@ -121,6 +126,7 @@ const ar: Record<keyof typeof en, string> = {
   askedBy: "سأل",
   shareX: "مشاركة على X",
   copyLink: "نسخ الرابط",
+  viewQuestion: "عرض السؤال",
   copied: "تم النسخ",
   downloadCard: "تنزيل البطاقة",
   answered: "المجاب عنها",
@@ -128,7 +134,7 @@ const ar: Record<keyof typeof en, string> = {
   thanks: "وصل سؤالك. سيظهر هنا عندما يُجاب.",
   notFound: "هذه الصفحة غير موجودة.",
   notAnswered: "لم يُجب عن هذا السؤال بعد.",
-  allAnswers: "كل الإجابات",
+  backToQuestions: "العودة لكل الأسئلة",
   tooManyAsks: "أسئلة كثيرة. حاول لاحقًا.",
   forbidden: "غير مسموح.",
   invalidQuestion: "السؤال بين حرف واحد و1000 حرف.",
@@ -172,6 +178,10 @@ const ar: Record<keyof typeof en, string> = {
   shortPassword: "كلمة المرور من 8 أحرف على الأقل.",
   passwordMismatch: "كلمتا المرور غير متطابقتين.",
   badPhoto: "الصورة JPEG أو PNG أو WebP أو GIF حتى 512 كيلوبايت.",
+  theme: "المظهر",
+  themeLight: "فاتح",
+  themeDark: "داكن",
+  themeSystem: "النظام",
 }
 
 export type Msg = keyof typeof en

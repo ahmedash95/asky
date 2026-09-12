@@ -1,6 +1,8 @@
 @import "tailwindcss" source(none);
 @source "./**/*.ts";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "Plus Jakarta Sans", "Cairo", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Fraunces", "Amiri", "Iowan Old Style", Georgia, serif;
@@ -17,6 +19,16 @@
 @layer base {
   html {
     background: var(--color-paper);
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+    --color-paper: #161210;
+    --color-card: #221c18;
+    --color-ink: #f3ebe1;
+    --color-mute: #a89f94;
+    --color-line: #3d342c;
+    --shadow-lift: 0 24px 50px -28px rgb(0 0 0 / 0.72);
   }
   details > summary {
     list-style: none;
