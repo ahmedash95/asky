@@ -1,6 +1,6 @@
 // dep: @cf-wasm/resvg
 import { Resvg } from "@cf-wasm/resvg/workerd"
-import { getByPublicId } from "./db"
+import { getByPublicId, siteName, type Settings } from "./db"
 import { font } from "./fonts/serif"
 import arabicFont from "./fonts/NotoNaskhArabic-Regular.ttf"
 import { isRtlText } from "./i18n"
@@ -11,11 +11,16 @@ const LINE = 36
 const MAX_LINES = 6
 const arabicBytes = new Uint8Array(arabicFont)
 
-export async function handleOg(_request: Request, env: Env, uuid: string): Promise<Response> {
+export async function handleOg(
+  _request: Request,
+  env: Env,
+  uuid: string,
+  settings: Settings,
+): Promise<Response> {
   const q = await getByPublicId(env.DB, uuid)
   if (!q || !q.answer) return new Response("Not found", { status: 404 })
 
-  const resvg = await Resvg.async(svg(env.SITE_NAME, q.body), {
+  const resvg = await Resvg.async(svg(siteName(env, settings), q.body), {
     fitTo: { mode: "original" },
     font: {
       fontBuffers: [font, arabicBytes],

@@ -39,9 +39,11 @@ On your Cloudflare account:
 
 4. Open the Worker URL, complete admin setup, then point followers at the site.
 
-Change `SITE_NAME` and `SITE_TAGLINE` in `wrangler.jsonc` vars before you share the site. `ADMIN_PATH` there is only the suggested default on the setup form.
+Set your display name, photo, bio and links on the Profile tab of your admin page. `SITE_NAME` in `wrangler.jsonc` is only the fallback used until you save a display name; `SITE_TAGLINE` is the fallback for an empty bio. `ADMIN_PATH` there is only the suggested default on the setup form.
 
 A custom hostname on a Cloudflare zone gives you DDoS protection in front of the Worker.
+
+Your admin inbox shows each asker's country as a flag from `flagcdn.com`. That is the only third-party request in the app, it happens on your private pages only, and the country name itself is resolved locally. If the image cannot load, the country name still shows.
 
 ## Optional
 

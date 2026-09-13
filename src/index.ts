@@ -38,7 +38,7 @@ export default {
 
     const og = pathname.match(/^\/q\/([^/]+)\/og\.png$/)
     if (og) {
-      return withSecurityHeaders(await handleOg(request, env, og[1]))
+      return withSecurityHeaders(await handleOg(request, env, og[1], settings))
     }
 
     if (isAdminPath(pathname, settings.admin_path)) {

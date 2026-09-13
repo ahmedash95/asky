@@ -1,19 +1,21 @@
-export type Locale = "en" | "ar"
+export type Locale = "en" | "ar";
 
 export function parseLocale(v: unknown): Locale {
-  return String(v) === "ar" ? "ar" : "en"
+  return String(v) === "ar" ? "ar" : "en";
 }
 
 export function isRtlText(s: string): boolean {
-  return /[\u0590-\u08FF]/.test(s)
+  return /[\u0590-\u08FF]/.test(s);
 }
 
 const en = {
   setupKicker: "First-time setup",
   setupTitle: "Open your inbox",
-  setupLead: "Pick a secret admin address and a password. The public ask page stays closed until you finish.",
+  setupLead:
+    "Pick a secret admin address and a password. The public ask page stays closed until you finish.",
   adminPath: "Admin path",
-  adminPathHelp: "Use something only you know, like /orange-notebook. Avoid /admin.",
+  adminPathHelp:
+    "Use something only you know, like /orange-notebook. Avoid /admin.",
   password: "Password",
   confirmPassword: "Confirm password",
   saveContinue: "Save and continue",
@@ -32,7 +34,8 @@ const en = {
   optional: "(optional)",
   name: "Name",
   email: "Email",
-  anonymousHelp: "Leave blank to stay anonymous. Email is never shown publicly.",
+  anonymousHelp:
+    "Leave blank to stay anonymous. Email is never shown publicly.",
   question: "Question",
   answer: "Answer",
   askedBy: "Asked by",
@@ -66,14 +69,19 @@ const en = {
   profile: "Profile",
   profileLead: "This is what visitors see beside your questions.",
   profileSaved: "Profile saved.",
+  siteName: "Display name",
+  siteNameHelp:
+    "Your name or your site’s name. Shown on your page, the browser tab, and shared cards.",
   bio: "Bio",
   bioPlaceholder: "A line about you…",
   bioHelp: "Shown next to your photo. Up to 400 characters.",
   links: "Links",
   linkTitle: "Label",
   linkUrl: "https://",
-  linksHelp: "Website, X, GitHub — whatever belongs on your public page. Up to 8.",
-  inboxLead: "New questions wait here. Answering one puts it on the public wall.",
+  linksHelp:
+    "Website, X, GitHub — whatever belongs on your public page. Up to 8.",
+  inboxLead:
+    "New questions wait here. Answering one puts it on the public wall.",
   answeredLead: "Already on the wall. Edit or delete anytime.",
   emptyInbox: "Inbox is clear.",
   emptyInboxHelp: "New questions will land here.",
@@ -85,6 +93,8 @@ const en = {
   delete: "Delete",
   confirmDelete: "Delete this question?",
   answeredOn: "answered",
+  askedOn: "asked",
+  fromCountry: "from",
   tooManyTries: "Too many tries. Wait a few minutes.",
   badPath: "Pick a path like /orange-notebook. Reserved: /, /ask, /q, /setup.",
   shortPassword: "Password must be at least 8 characters.",
@@ -94,14 +104,16 @@ const en = {
   themeLight: "Light",
   themeDark: "Dark",
   themeSystem: "System",
-}
+};
 
 const ar: Record<keyof typeof en, string> = {
   setupKicker: "إعداد أولي",
   setupTitle: "افتح صندوق أسئلتك",
-  setupLead: "اختر عنوانًا سريًا للوحة الإدارة وكلمة مرور. تبقى صفحة الأسئلة مغلقة حتى تنتهي.",
+  setupLead:
+    "اختر عنوانًا سريًا للوحة الإدارة وكلمة مرور. تبقى صفحة الأسئلة مغلقة حتى تنتهي.",
   adminPath: "مسار لوحة الإدارة",
-  adminPathHelp: "اختر شيئًا تعرفه أنت فقط، مثل /orange-notebook. تجنّب /admin.",
+  adminPathHelp:
+    "اختر شيئًا تعرفه أنت فقط، مثل /orange-notebook. تجنّب /admin.",
   password: "كلمة المرور",
   confirmPassword: "تأكيد كلمة المرور",
   saveContinue: "حفظ ومتابعة",
@@ -154,6 +166,9 @@ const ar: Record<keyof typeof en, string> = {
   profile: "الملف",
   profileLead: "هذا ما يراه الزوار بجانب أسئلتك.",
   profileSaved: "حُفظ الملف.",
+  siteName: "اسم العرض",
+  siteNameHelp:
+    "اسمك أو اسم موقعك. يظهر في صفحتك وتبويب المتصفح وبطاقات المشاركة.",
   bio: "نبذة",
   bioPlaceholder: "سطر عنك…",
   bioHelp: "تظهر بجانب صورتك. حتى 400 حرف.",
@@ -173,6 +188,8 @@ const ar: Record<keyof typeof en, string> = {
   delete: "حذف",
   confirmDelete: "حذف هذا السؤال؟",
   answeredOn: "أُجيب",
+  askedOn: "وصل",
+  fromCountry: "من",
   tooManyTries: "محاولات كثيرة. انتظر قليلًا.",
   badPath: "اختر مسارًا مثل /orange-notebook. محجوز: / و /ask و /q و /setup.",
   shortPassword: "كلمة المرور من 8 أحرف على الأقل.",
@@ -182,10 +199,10 @@ const ar: Record<keyof typeof en, string> = {
   themeLight: "فاتح",
   themeDark: "داكن",
   themeSystem: "النظام",
-}
+};
 
-export type Msg = keyof typeof en
+export type Msg = keyof typeof en;
 
 export function t(locale: Locale, key: Msg): string {
-  return (locale === "ar" ? ar : en)[key]
+  return (locale === "ar" ? ar : en)[key];
 }

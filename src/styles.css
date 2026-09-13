@@ -16,6 +16,15 @@
   --shadow-lift: 0 24px 50px -28px rgb(28 22 18 / 0.45);
 }
 
+/* Grow with the text, and keep the drag handle only where that is unsupported. */
+@utility autogrow {
+  field-sizing: content;
+  resize: vertical;
+  @supports (field-sizing: content) {
+    resize: none;
+  }
+}
+
 @layer base {
   html {
     background: var(--color-paper);
@@ -35,5 +44,13 @@
   }
   details > summary::-webkit-details-marker {
     display: none;
+  }
+  /* dir=auto resolves to ltr while a field is empty, which strands the
+     placeholder and caret on the wrong side of an rtl page. */
+  [dir="rtl"] :is(input, textarea)[dir="auto"]:placeholder-shown {
+    text-align: right;
+  }
+  textarea::placeholder {
+    line-height: inherit;
   }
 }

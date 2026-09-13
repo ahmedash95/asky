@@ -6,6 +6,7 @@ export type Settings = {
   session_secret: string
   locale: "en" | "ar"
   has_avatar: number
+  site_name: string
   bio: string
   links: Link[]
 }
@@ -13,7 +14,7 @@ export type Settings = {
 export async function getSettings(db: D1Database): Promise<Settings | null> {
   const row = await db
     .prepare(
-      `SELECT admin_path, password_hash, session_secret, locale, bio, links,
+      `SELECT admin_path, password_hash, session_secret, locale, site_name, bio, links,
               CASE WHEN avatar IS NOT NULL THEN 1 ELSE 0 END AS has_avatar
        FROM settings WHERE id = 1`,
     )
@@ -22,6 +23,7 @@ export async function getSettings(db: D1Database): Promise<Settings | null> {
       password_hash: string
       session_secret: string
       locale: string | null
+      site_name: string | null
       bio: string | null
       links: string | null
       has_avatar: number
@@ -33,9 +35,15 @@ export async function getSettings(db: D1Database): Promise<Settings | null> {
     session_secret: row.session_secret,
     locale: row.locale === "ar" ? "ar" : "en",
     has_avatar: row.has_avatar ? 1 : 0,
+    site_name: row.site_name ?? "",
     bio: row.bio ?? "",
     links: parseLinks(row.links),
   }
+}
+
+/** The name visitors see. Falls back to the SITE_NAME var until the admin sets one. */
+export function siteName(env: Env, settings: Settings | null): string {
+  return settings?.site_name.trim() || env.SITE_NAME
 }
 
 export async function saveSettings(
@@ -86,30 +94,32 @@ export async function updateProfile(
   db: D1Database,
   patch: {
     locale: "en" | "ar"
+    siteName: string
     bio: string
     links: Link[]
     avatar?: { bytes: ArrayBuffer; type: string }
     removeAvatar?: boolean
   },
 ): Promise<void> {
-  const links = JSON.stringify(patch.links)
+  const set = "UPDATE settings SET site_name = ?, locale = ?, bio = ?, links = ?"
+  const values = [patch.siteName, patch.locale, patch.bio, JSON.stringify(patch.links)]
   if (patch.removeAvatar) {
     await db
-      .prepare("UPDATE settings SET locale = ?, bio = ?, links = ?, avatar = NULL, avatar_type = NULL WHERE id = 1")
-      .bind(patch.locale, patch.bio, links)
+      .prepare(`${set}, avatar = NULL, avatar_type = NULL WHERE id = 1`)
+      .bind(...values)
       .run()
     return
   }
   if (patch.avatar) {
     await db
-      .prepare("UPDATE settings SET locale = ?, bio = ?, links = ?, avatar = ?, avatar_type = ? WHERE id = 1")
-      .bind(patch.locale, patch.bio, links, new Uint8Array(patch.avatar.bytes), patch.avatar.type)
+      .prepare(`${set}, avatar = ?, avatar_type = ? WHERE id = 1`)
+      .bind(...values, new Uint8Array(patch.avatar.bytes), patch.avatar.type)
       .run()
     return
   }
   await db
-    .prepare("UPDATE settings SET locale = ?, bio = ?, links = ? WHERE id = 1")
-    .bind(patch.locale, patch.bio, links)
+    .prepare(`${set} WHERE id = 1`)
+    .bind(...values)
     .run()
 }
 
